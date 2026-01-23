@@ -74,6 +74,7 @@ export class App implements OnInit {
       next: (createdTodo) => {
         this.allTodos.update(todos => [createdTodo, ...todos]);
         this.resetCreateForm();
+        this.closeCreateModal();
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -110,6 +111,7 @@ export class App implements OnInit {
           )
         );
         this.resetEditForm();
+        this.closeEditModal();
         this.isLoading.set(false);
       },
       error: (error) => {
