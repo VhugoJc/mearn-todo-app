@@ -256,13 +256,3 @@ docker-compose build <service-name>
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Victor Jiménez**
-
-- GitHub: [@yourusername](https://github.com/yourusername)
-
----
-
-⭐ If this project helped you, please give it a star!

@@ -1,0 +1,280 @@
+<div class="todo-app">
+  <!-- Top Navigation Bar -->
+  <nav class="top-bar">
+    <div class="logo-container">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 12l2 2 4-4"/>
+          <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h1>MEAN TODO</h1>
+        <span class="logo-subtitle">Task Manager</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button (click)="openCreateModal()" class="nav-create-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        <span>New Task</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Create Task Modal -->
+  @if (isCreateModalOpen()) {
+    <div class="modal-overlay" (click)="closeCreateModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Create New Task</h2>
+          <button (click)="closeCreateModal()" class="close-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="createTodo()" class="create-form">
+            <div class="form-group">
+              <label for="todoTitle">Task Title</label>
+              <input 
+                id="todoTitle"
+                type="text" 
+                [(ngModel)]="newTodoTitle"
+                name="todoTitle"
+                placeholder="Enter task title..."
+                class="form-input"
+                required
+                autofocus
+              />
+            </div>
+            <div class="form-group">
+              <label for="todoDescription">Description (Optional)</label>
+              <textarea 
+                id="todoDescription"
+                [(ngModel)]="newTodoDescription"
+                name="todoDescription"
+                placeholder="Enter task description..."
+                class="form-textarea"
+                rows="4"
+              ></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" (click)="closeCreateModal()" class="cancel-btn">
+                Cancel
+              </button>
+              <button type="submit" class="create-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Create Task
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Task Modal -->
+  @if (isEditModalOpen()) {
+    <div class="modal-overlay" (click)="closeEditModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Edit Task</h2>
+          <button (click)="closeEditModal()" class="close-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveEdit()" class="create-form">
+            <div class="form-group">
+              <label for="editTitle">Task Title</label>
+              <input 
+                id="editTitle"
+                type="text" 
+                [(ngModel)]="editingTitle"
+                name="editTitle"
+                placeholder="Enter task title..."
+                class="form-input"
+                required
+                autofocus
+              />
+            </div>
+            <div class="form-group">
+              <label for="editDescription">Description (Optional)</label>
+              <textarea 
+                id="editDescription"
+                [(ngModel)]="editingDescription"
+                name="editDescription"
+                placeholder="Enter task description..."
+                class="form-textarea"
+                rows="4"
+              ></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" (click)="closeEditModal()" class="cancel-btn">
+                Cancel
+              </button>
+              <button type="submit" class="create-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Todo Boards -->
+  <div class="todo-boards">
+    <!-- Todo Column -->
+    <div class="todo-column">
+      <div class="column-header todo-header">
+        <h3>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          To Do ({{ todoList().length }})
+        </h3>
+      </div>
+      <div 
+        class="todo-list"
+        cdkDropList
+        id="todo-list"
+        [cdkDropListData]="todoList()"
+        [cdkDropListConnectedTo]="['in-progress-list', 'completed-list']"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        @for (todo of todoList(); track todo.id) {
+          <div class="todo-item" cdkDrag>
+            <div class="todo-content">
+              <h4>{{ todo.title }}</h4>
+              <p>{{ todo.description }}</p>
+              <small>Created: {{ todo.createdAt | date:'short' }}</small>
+            </div>
+            <div class="todo-actions">
+              <button (click)="editTodo(todo)" class="edit-btn" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button (click)="deleteTodo(todo.id)" class="delete-btn" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3,6 5,6 21,6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- In Progress Column -->
+    <div class="todo-column">
+      <div class="column-header in-progress-header">
+        <h3>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v10l4.5 4.5"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          In Progress ({{ inProgressList().length }})
+        </h3>
+      </div>
+      <div 
+        class="todo-list"
+        cdkDropList
+        id="in-progress-list"
+        [cdkDropListData]="inProgressList()"
+        [cdkDropListConnectedTo]="['todo-list', 'completed-list']"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        @for (todo of inProgressList(); track todo.id) {
+          <div class="todo-item in-progress-item" cdkDrag>
+            <div class="todo-content">
+              <h4>{{ todo.title }}</h4>
+              <p>{{ todo.description }}</p>
+              <small>Created: {{ todo.createdAt | date:'short' }}</small>
+            </div>
+            <div class="todo-actions">
+              <button (click)="editTodo(todo)" class="edit-btn" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button (click)="deleteTodo(todo.id)" class="delete-btn" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3,6 5,6 21,6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Completed Column -->
+    <div class="todo-column">
+      <div class="column-header completed-header">
+        <h3>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22,4 12,14.01 9,11.01"/>
+          </svg>
+          Completed ({{ completedList().length }})
+        </h3>
+      </div>
+      <div 
+        class="todo-list"
+        cdkDropList
+        id="completed-list"
+        [cdkDropListData]="completedList()"
+        [cdkDropListConnectedTo]="['todo-list', 'in-progress-list']"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        @for (todo of completedList(); track todo.id) {
+          <div class="todo-item completed-item" cdkDrag>
+            <div class="todo-content">
+              <h4>{{ todo.title }}</h4>
+              <p>{{ todo.description }}</p>
+              <small>Created: {{ todo.createdAt | date:'short' }}</small>
+            </div>
+            <div class="todo-actions">
+              <button (click)="editTodo(todo)" class="edit-btn" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button (click)="deleteTodo(todo.id)" class="delete-btn" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3,6 5,6 21,6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
