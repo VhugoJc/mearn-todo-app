@@ -1,6 +1,6 @@
-# MEAN Todo App with Terraform
+# MEAN Todo Application
 
-A full-stack Todo application built with the MEAN stack (MongoDB, Express.js, Angular, Node.js) and deployed using Terraform infrastructure as code.
+A full-stack Todo application built with the MEAN stack (MongoDB, Express.js, Angular, Node.js).
 
 ## 🏗️ Architecture
 
@@ -11,22 +11,23 @@ A full-stack Todo application built with the MEAN stack (MongoDB, Express.js, An
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 📋 Features
+## ✨ Features
 
-- ✅ Create, read, update, and delete todos
-- ✅ Mark todos as complete/incomplete
-- ✅ Filter todos by status (all, active, completed)
-- ✅ Responsive design
-- ✅ RESTful API
-- ✅ Cloud deployment with Terraform
-- ✅ Containerized with Docker
+- ✅ Create, edit, and delete todos
+- ✅ Drag & drop todos between columns (Todo, In Progress, Completed)
+- ✅ Professional UI with modals and animations
+- ✅ Real-time updates with MongoDB
+- ✅ RESTful API with full CRUD operations
+- ✅ Environment-based configuration
+- ✅ Error handling and loading states
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Angular** - TypeScript-based web framework
-- **Angular Material** - UI component library
-- **RxJS** - Reactive programming library
+- **Angular 21** - Latest Angular with standalone components
+- **TypeScript** - Type-safe JavaScript
+- **Angular CDK** - Drag & drop functionality
+- **SCSS** - Styling with variables and mixins
 
 ### Backend
 - **Node.js** - JavaScript runtime
@@ -34,39 +35,35 @@ A full-stack Todo application built with the MEAN stack (MongoDB, Express.js, An
 - **MongoDB** - NoSQL database
 - **Mongoose** - MongoDB object modeling
 
-### Infrastructure
-- **Terraform** - Infrastructure as Code
-- **Docker** - Containerization
-- **AWS/GCP/Azure** - Cloud provider (configurable)
+### Development Tools
+- **Docker** - MongoDB containerization
+- **Environment Variables** - Configuration management
 
 ## 📁 Project Structure
 
 ```
 mean-todo-app/
-├── terraform/                 # Infrastructure as Code
-│   ├── main.tf               # Main Terraform configuration
-│   ├── variables.tf          # Variable definitions
-│   ├── outputs.tf            # Output values
-│   └── modules/              # Reusable modules
-├── backend/                  # Node.js API
-│   ├── src/
-│   │   ├── controllers/      # Route handlers
-│   │   ├── models/           # Database models
-│   │   ├── routes/           # API routes
-│   │   └── app.js           # Express app setup
-│   ├── package.json
-│   └── Dockerfile
 ├── frontend/                 # Angular application
 │   ├── src/
-│   │   ├── app/             # Angular components
-│   │   ├── environments/    # Environment configs
-│   │   └── assets/          # Static assets
-│   ├── package.json
-│   ├── angular.json
-│   └── Dockerfile
-├── docker-compose.yml        # Local development
-├── .gitignore
-└── README.md
+│   │   ├── app/
+│   │   │   ├── app.ts       # Main component
+│   │   │   ├── app.html     # Component template
+│   │   │   ├── app.scss     # Component styles
+│   │   │   └── services/
+│   │   │       └── todo.service.ts
+│   │   └── environments/    # Environment configs
+├── backend/                 # Express.js API
+│   ├── src/
+│   │   ├── app.js          # Express app setup
+│   │   ├── config/         # Configuration files
+│   │   ├── controllers/    # Route controllers
+│   │   ├── models/         # Mongoose models
+│   │   ├── routes/         # API routes
+│   │   └── middleware/     # Custom middleware
+│   └── server.js           # Server entry point
+└── mongodb/                # Database setup
+    ├── Dockerfile          # MongoDB container
+    └── init-mongo.js       # Database initialization
 ```
 
 ## 🚀 Quick Start
@@ -75,175 +72,154 @@ mean-todo-app/
 
 - Node.js (v18+)
 - Angular CLI (`npm install -g @angular/cli`)
-- MongoDB (local or cloud)
 - Docker & Docker Compose
-- Terraform CLI
 
-### Local Development
+### Step 1: Clone and Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd mean-todo-app
-   ```
+```bash
+git clone https://github.com/VhugoJc/mearn-todo-app.git
+cd mean-todo-app
+```
 
-2. **Start with Docker Compose**
-   ```bash
-   docker-compose up -d
-   ```
+### Step 2: Start MongoDB
 
-3. **Or run manually:**
+```bash
+cd mongodb
+docker build -t mean-todo-mongodb .
+docker run -d -p 27017:27017 --name mongodb mean-todo-mongodb
+```
 
-   **Backend:**
-   ```bash
-   cd backend
-   npm install
-   npm run dev
-   ```
+### Step 3: Start Backend API
 
-   **Frontend:**
-   ```bash
-   cd frontend
-   npm install
-   ng serve
-   ```
+```bash
+cd backend
+npm install
+npm start
+```
 
-4. **Access the application**
-   - Frontend: http://localhost:4200
-   - Backend API: http://localhost:3000
-   - MongoDB: localhost:27017
+Backend will run on `http://localhost:3000`
 
-## 🌐 Cloud Deployment
+### Step 4: Start Frontend
 
-### Using Terraform
+```bash
+cd frontend
+npm install
+npm start
+```
 
-1. **Configure your cloud provider credentials**
-   ```bash
-   # For AWS
-   export AWS_ACCESS_KEY_ID="your-access-key"
-   export AWS_SECRET_ACCESS_KEY="your-secret-key"
-   ```
+Frontend will run on `http://localhost:4200`
 
-2. **Initialize Terraform**
-   ```bash
-   cd terraform
-   terraform init
-   ```
+## 🔧 Configuration
 
-3. **Plan the deployment**
-   ```bash
-   terraform plan
-   ```
+### Environment Variables
 
-4. **Deploy to cloud**
-   ```bash
-   terraform apply
-   ```
+**Backend** (`.env` file):
+```
+NODE_ENV=development
+PORT=3000
+MONGODB_URI=mongodb://admin:password@localhost:27017/meantodo?authSource=admin
+CORS_ORIGIN=http://localhost:4200
+JWT_SECRET=your-secret-key
+```
 
-5. **Get deployment URLs**
-   ```bash
-   terraform output
-   ```
+**Frontend** (environment files):
+- `src/environments/environment.ts` - Development config
+- `src/environments/environment.prod.ts` - Production config
 
 ## 📝 API Endpoints
 
-| Method | Endpoint      | Description           |
-|--------|---------------|-----------------------|
-| GET    | `/api/todos`  | Get all todos         |
-| POST   | `/api/todos`  | Create a new todo     |
-| GET    | `/api/todos/:id` | Get todo by ID     |
-| PUT    | `/api/todos/:id` | Update todo        |
-| DELETE | `/api/todos/:id` | Delete todo        |
+### Base URL: `http://localhost:3000/api`
 
-## 🔧 Environment Variables
+| Method | Endpoint              | Description           |
+|--------|-----------------------|-----------------------|
+| GET    | `/todos`              | Get all todos         |
+| POST   | `/todos`              | Create a new todo     |
+| GET    | `/todos/:id`          | Get todo by ID        |
+| PUT    | `/todos/:id`          | Update todo           |
+| DELETE | `/todos/:id`          | Delete todo           |
+| GET    | `/todos/status/:status` | Get todos by status |
+| GET    | `/health`             | Health check          |
 
-### Backend (.env)
-```env
-NODE_ENV=development
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/todoapp
-JWT_SECRET=your-jwt-secret
-```
+### Example API Usage
 
-### Frontend (environment.ts)
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:3000/api'
-};
-```
-
-## 🧪 Testing
-
-**Backend tests:**
+**Create a todo:**
 ```bash
-cd backend
-npm test
+curl -X POST http://localhost:3000/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Learn MEAN Stack",
+    "description": "Complete the todo application",
+    "status": "todo"
+  }'
 ```
 
-**Frontend tests:**
+**Get all todos:**
 ```bash
-cd frontend
-ng test
+curl http://localhost:3000/api/todos
 ```
 
-**E2E tests:**
-```bash
-cd frontend
-ng e2e
-```
+## � Application Features
 
-## 📦 Docker Commands
+### Frontend Features
+- **Kanban Board**: Three columns (Todo, In Progress, Completed)
+- **Drag & Drop**: Move todos between columns
+- **Modal Forms**: Create and edit todos in modal dialogs
+- **Responsive Design**: Works on desktop and mobile
+- **Real-time Updates**: Automatic UI updates after API calls
+- **Error Handling**: User-friendly error messages
+- **Loading States**: Visual feedback during operations
 
-**Build images:**
-```bash
-docker-compose build
-```
+### Backend Features
+- **RESTful API**: Standard HTTP methods and status codes
+- **Data Validation**: Input validation with proper error messages
+- **CORS Support**: Configured for frontend-backend communication
+- **Environment Config**: Flexible configuration system
+- **Error Handling**: Centralized error handling middleware
+- **Health Checks**: API status endpoint
 
-**Start services:**
-```bash
-docker-compose up -d
-```
+### Database Features
+- **MongoDB**: Document-based NoSQL database
+- **Data Persistence**: All todos stored permanently
+- **Sample Data**: Pre-loaded example todos
+- **Docker Container**: Easy setup and deployment
 
-**View logs:**
-```bash
-docker-compose logs -f
-```
-
-**Stop services:**
-```bash
-docker-compose down
-```
-
-## 🚨 Troubleshooting
+## � Troubleshooting
 
 ### Common Issues
 
-1. **MongoDB connection issues**
-   - Check if MongoDB is running
-   - Verify connection string in environment variables
+1. **Port already in use**
+   ```bash
+   # Kill process on port 3000
+   lsof -ti:3000 | xargs kill -9
+   
+   # Kill process on port 4200
+   lsof -ti:4200 | xargs kill -9
+   ```
 
-2. **CORS errors**
-   - Ensure backend CORS is configured for frontend URL
+2. **MongoDB connection failed**
+   ```bash
+   # Check if Docker container is running
+   docker ps
+   
+   # Restart MongoDB container
+   docker restart mongodb
+   ```
 
-3. **Port conflicts**
-   - Change ports in docker-compose.yml or environment configs
+3. **CORS errors**
+   - Verify `CORS_ORIGIN` in backend `.env` file
+   - Check frontend is running on the allowed origin
 
-### Useful Commands
+4. **Frontend not connecting to API**
+   - Check backend is running on port 3000
+   - Verify `environment.ts` has correct API URL
 
-```bash
-# Check running containers
-docker ps
+## 💡 Development Tips
 
-# View container logs
-docker logs <container-name>
-
-# Connect to MongoDB
-docker exec -it mongodb mongo
-
-# Rebuild specific service
-docker-compose build <service-name>
-```
+- Use `npm run dev` for backend development (with nodemon)
+- Use Angular DevTools browser extension for debugging
+- Check browser console for frontend errors
+- Check backend console for API errors
+- Use Postman or curl to test API endpoints directly
 
 ## 🤝 Contributing
 
@@ -255,4 +231,4 @@ docker-compose build <service-name>
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
