@@ -722,7 +722,161 @@ html, body {
   background: #ffffff;
 }
 
-// Responsive Design
+/* Error Message Styles */
+.error-message {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(204, 51, 51, 0.2);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 500px;
+  animation: slideDown 0.3s ease-out;
+
+  .error-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+
+    svg {
+      flex-shrink: 0;
+      color: #c33;
+    }
+  }
+
+  .dismiss-error {
+    background: none;
+    border: none;
+    color: #c33;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: rgba(204, 51, 51, 0.1);
+    }
+  }
+}
+
+/* Loading Overlay Styles */
+.loading-overlay {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  backdrop-filter: blur(2px);
+
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #1976d2;
+
+    svg {
+      animation: spin 1s linear infinite;
+    }
+
+    span {
+      font-weight: 500;
+      font-size: 16px;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+// Modal responsive design
+@media (max-width: 640px) {
+  .modal-content {
+    margin: 0.5rem;
+    max-width: none;
+    width: calc(100% - 1rem);
+  }
+  
+  .modal-header {
+    padding: 1rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+    
+    .cancel-btn,
+    .create-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .create-task-button-section .open-modal-btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+  }
+}
+
 @media (max-width: 768px) {
   .todo-app {
     padding: 0;
@@ -831,57 +985,5 @@ html, body {
       font-size: 0.875rem;
       padding: 0.75rem 1rem;
     }
-  }
-}
-
-// Animation keyframes
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-
-
-// Modal responsive design
-@media (max-width: 640px) {
-  .modal-content {
-    margin: 0.5rem;
-    max-width: none;
-    width: calc(100% - 1rem);
-  }
-  
-  .modal-header {
-    padding: 1rem;
-  }
-  
-  .modal-body {
-    padding: 1rem;
-  }
-  
-  .modal-actions {
-    flex-direction: column-reverse;
-    gap: 0.75rem;
-    
-    .cancel-btn,
-    .create-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  
-  .create-task-button-section .open-modal-btn {
-    padding: 0.875rem 1.5rem;
-    font-size: 0.875rem;
   }
 }

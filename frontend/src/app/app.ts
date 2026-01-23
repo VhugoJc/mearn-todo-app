@@ -1,47 +1,25 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
-
-export interface Todo {
-  id: number;
-  title: string;
-  description: string;
-  status: 'todo' | 'in-progress' | 'completed';
-  createdAt: Date;
-}
+import { TodoService, Todo } from './services/todo.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, HttpClientModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
-  // All todos in a single list
-  private allTodos = signal<Todo[]>([
-    {
-      id: 1,
-      title: 'Setup Angular Project',
-      description: 'Create the initial Angular application structure',
-      status: 'completed',
-      createdAt: new Date('2026-01-20')
-    },
-    {
-      id: 2,
-      title: 'Create Todo Components',
-      description: 'Build the todo list interface with drag & drop',
-      status: 'in-progress',
-      createdAt: new Date('2026-01-22')
-    },
-    {
-      id: 3,
-      title: 'Connect to Backend API',
-      description: 'Integrate with Express.js backend and MongoDB',
-      status: 'todo',
-      createdAt: new Date('2026-01-22')
-    }
-  ]);
+export class App implements OnInit {
+  private todoService = inject(TodoService);
+  
+  // All todos from the backend
+  private allTodos = signal<Todo[]>([]);
+  
+  // Loading and error states
+  isLoading = signal(false);
+  error = signal<string | null>(null);
 
   // Computed signals for filtered lists
   todoList = computed(() => this.allTodos().filter(todo => todo.status === 'todo'));
@@ -59,20 +37,51 @@ export class App {
   isCreateModalOpen = signal(false);
   isEditModalOpen = signal(false);
 
+  ngOnInit() {
+    this.loadTodos();
+  }
+
+  private loadTodos() {
+    this.isLoading.set(true);
+    this.error.set(null);
+    
+    this.todoService.getTodos().subscribe({
+      next: (todos) => {
+        this.allTodos.set(todos);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.error.set(error);
+        this.isLoading.set(false);
+        console.error('Error loading todos:', error);
+      }
+    });
+  }
+
   createTodo() {
     const title = this.newTodoTitle().trim();
     if (!title) return;
     
-    const newTodo: Todo = {
-      id: Date.now(),
+    this.isLoading.set(true);
+    
+    const newTodo = {
       title,
       description: this.newTodoDescription(),
-      status: 'todo',
-      createdAt: new Date()
+      status: 'todo' as const
     };
     
-    this.allTodos.update(todos => [...todos, newTodo]);
-    this.resetCreateForm();
+    this.todoService.createTodo(newTodo).subscribe({
+      next: (createdTodo) => {
+        this.allTodos.update(todos => [createdTodo, ...todos]);
+        this.resetCreateForm();
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.error.set(error);
+        this.isLoading.set(false);
+        console.error('Error creating todo:', error);
+      }
+    });
   }
 
   editTodo(todo: Todo) {
@@ -84,22 +93,48 @@ export class App {
 
   saveEdit() {
     const editing = this.editingTodo();
-    if (!editing) return;
+    if (!editing || !editing._id) return;
     
-    this.allTodos.update(todos => 
-      todos.map(todo => 
-        todo.id === editing.id 
-          ? { ...todo, title: this.editingTitle(), description: this.editingDescription() }
-          : todo
-      )
-    );
+    this.isLoading.set(true);
     
-    this.resetEditForm();
+    const updates = {
+      title: this.editingTitle(),
+      description: this.editingDescription()
+    };
+    
+    this.todoService.updateTodo(editing._id, updates).subscribe({
+      next: (updatedTodo) => {
+        this.allTodos.update(todos => 
+          todos.map(todo => 
+            todo._id === editing._id ? updatedTodo : todo
+          )
+        );
+        this.resetEditForm();
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.error.set(error);
+        this.isLoading.set(false);
+        console.error('Error updating todo:', error);
+      }
+    });
   }
 
-  deleteTodo(todoId: number) {
+  deleteTodo(todoId: string) {
     if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
-      this.allTodos.update(todos => todos.filter(todo => todo.id !== todoId));
+      this.isLoading.set(true);
+      
+      this.todoService.deleteTodo(todoId).subscribe({
+        next: () => {
+          this.allTodos.update(todos => todos.filter(todo => todo._id !== todoId));
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          this.error.set(error);
+          this.isLoading.set(false);
+          console.error('Error deleting todo:', error);
+        }
+      });
     }
   }
 
@@ -116,7 +151,25 @@ export class App {
         'completed-list': 'completed'
       };
       
-      todo.status = statusMap[event.container.id];
+      const newStatus = statusMap[event.container.id];
+      
+      if (newStatus && todo._id) {
+        // Update in backend
+        this.todoService.updateTodo(todo._id, { status: newStatus }).subscribe({
+          next: (updatedTodo) => {
+            // Update local state
+            this.allTodos.update(todos => 
+              todos.map(t => t._id === todo._id ? { ...t, status: newStatus } : t)
+            );
+          },
+          error: (error) => {
+            this.error.set(error);
+            console.error('Error updating todo status:', error);
+            // Revert the UI change on error
+            this.loadTodos();
+          }
+        });
+      }
       
       transferArrayItem(
         event.previousContainer.data,
@@ -151,5 +204,10 @@ export class App {
     this.editingTodo.set(null);
     this.editingTitle.set('');
     this.editingDescription.set('');
+  }
+
+  // Helper method to get MongoDB ID for operations
+  getTodoId(todo: Todo): string {
+    return todo._id || '';
   }
 }
