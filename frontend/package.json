@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "npm run setenv && ng serve",
+    "build": "npm run setenv && ng build",
+    "build:prod": "NODE_ENV=production npm run setenv && ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "setenv": "node scripts/setenv.js"
   },
   "prettier": {
     "printWidth": 100,
@@ -37,6 +39,7 @@
     "@angular/build": "^21.1.1",
     "@angular/cli": "^21.1.1",
     "@angular/compiler-cli": "^21.1.0",
+    "dotenv": "^17.2.3",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
